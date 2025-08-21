@@ -1,0 +1,24 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\PlayerPositions;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Player extends Model
+{
+    use HasFactory;
+
+    protected $fillable = ['first_name','last_name','position','birth_date','team_id'];
+
+    protected $casts = [
+        'birth_date' => 'date',
+        'position'   => PlayerPositions::class,
+    ];
+
+    public function team()
+    {
+        return $this->belongsTo(Team::class);
+    }
+}
