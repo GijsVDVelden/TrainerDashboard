@@ -12,6 +12,6 @@ enum PlayerPositions: string
     Case CAM = 'Aanvallende Middenvelder';
     case LW = 'Linksbuiten';
     case RW = 'Rechtsbuiten';
-    case CF = 'Spits';
+    case SP = 'Spits';
 
 }

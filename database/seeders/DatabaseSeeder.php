@@ -8,6 +8,8 @@ use App\Models\Trainer;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use App\Enums\PlayerPositions;
+use App\Enums\AgeCategory;
 
 class DatabaseSeeder extends Seeder
 {
@@ -35,13 +37,13 @@ class DatabaseSeeder extends Seeder
         // 3. Maak teams aan
         $team1 = Team::create([
             'name' => 'JO17-1',
-            'age_category' => 'JO17',
+            'age_category' => AgeCategory::JO17->value,
             'season_id' => $season->id,
         ]);
 
         $team2 = Team::create([
             'name' => 'JO13-3',
-            'age_category' => 'JO13',
+            'age_category' => AgeCategory::JO13->value,
             'season_id' => $season->id,
         ]);
 
@@ -59,24 +61,109 @@ class DatabaseSeeder extends Seeder
         // 5. Voeg spelers toe aan team
         $team1->players()->createMany([
             [
-                'first_name' => 'Sebbe',
-                'last_name' => 'van Rijn',
-                'position' => 'Keeper',
+                'first_name' => 'Jaafar',
+                'last_name' => 'Aamir',
+                'position' => PlayerPositions::CM->value,
+                'birth_date' => '2009-08-21',
+            ],
+            [
+                'first_name' => 'Samuel',
+                'last_name' => 'Amanuel-Beyene',
+                'position' => PlayerPositions::CAM->value,
+                'birth_date' => '2009-08-21',
+            ],
+            [
+                'first_name' => 'Milan',
+                'last_name' => 'van Dijk',
+                'position' => PlayerPositions::RB->value,
                 'birth_date' => '2009-08-21',
             ],
             [
                 'first_name' => 'Emiel',
                 'last_name' => 'Brouwer',
-                'position' => 'Linksback',
+                'position' => PlayerPositions::LB->value,
                 'birth_date' => '2009-08-21',
             ],
             [
-                'first_name' => 'Jesse',
-                'last_name' => 'de Vries',
-                'position' => 'Middenvelder',
+                'first_name' => 'Roan',
+                'last_name' => 'Folmer',
+                'position' => PlayerPositions::CB->value,
+                'birth_date' => '2009-08-21',
+            ],
+            [
+                'first_name' => 'Saifeddine',
+                'last_name' => 'el Habachi',
+                'position' => PlayerPositions::SP->value,
+                'birth_date' => '2009-08-21',
+            ],
+            [
+                'first_name' => 'Stan',
+                'last_name' => 'Kampert',
+                'position' => PlayerPositions::CB->value,
+                'birth_date' => '2009-08-21',
+            ],
+            [
+                'first_name' => 'Kuba',
+                'last_name' => 'Kopiec',
+                'position' => PlayerPositions::SP->value,
+                'birth_date' => '2009-08-21',
+            ],
+            [
+                'first_name' => 'Roel',
+                'last_name' => 'van Leuven',
+                'position' => PlayerPositions::RB->value,
+                'birth_date' => '2009-08-21',
+            ],
+            [
+                'first_name' => 'Daniël',
+                'last_name' => 'Margaritidis',
+                'position' => PlayerPositions::CVM->value,
+                'birth_date' => '2009-08-21',
+            ],
+            [
+                'first_name' => 'Simon',
+                'last_name' => 'Okbazgi',
+                'position' => PlayerPositions::LW->value,
+                'birth_date' => '2009-08-21',
+            ],
+            [
+                'first_name' => 'Sebbe',
+                'last_name' => 'van Rijn',
+                'position' => PlayerPositions::GK->value,
+                'birth_date' => '2009-08-21',
+            ],
+            [
+                'first_name' => 'Jordan',
+                'last_name' => 'Schreuders',
+                'position' => PlayerPositions::CVM->value,
+                'birth_date' => '2009-08-21',
+            ],
+            [
+                'first_name' => 'Sem',
+                'last_name' => 'Valkenburg',
+                'position' => PlayerPositions::RB->value,
+                'birth_date' => '2009-08-21',
+            ],
+            [
+                'first_name' => 'Daan',
+                'last_name' => 'Wagteveld',
+                'position' => PlayerPositions::CVM->value,
+                'birth_date' => '2009-08-21',
+            ],
+            [
+                'first_name' => 'Kyan',
+                'last_name' => 'Wessels',
+                'position' => PlayerPositions::CAM->value,
+                'birth_date' => '2009-08-21',
+            ],
+            [
+                'first_name' => 'Sverre',
+                'last_name' => 'Wiersma',
+                'position' => PlayerPositions::GK->value,
                 'birth_date' => '2009-08-21',
             ],
         ]);
+
 
     }
 }

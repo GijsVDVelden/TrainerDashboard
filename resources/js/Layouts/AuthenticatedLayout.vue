@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import ApplicationLogo from '@/Components/ApplicationLogo.vue'
 import { Link, useForm, usePage } from '@inertiajs/vue3'
-import { Home, Users, LogOut } from 'lucide-vue-next'
+import { Home, Users, LogOut, Goal, Volleyball } from 'lucide-vue-next'
 
 const page = usePage()
 
@@ -74,6 +74,24 @@ function changeTeam() {
                 >
                     <Users class="h-5 w-5" />
                     <span>Spelers</span>
+                </Link>
+
+                <!-- Trainings -->
+                <Link
+                    :href="route('players.index')"
+                    class="flex items-center space-x-2 px-2 py-2 rounded text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium"
+                >
+                    <Goal class="h-5 w-5" />
+                    <span>Trainingen</span>
+                </Link>
+
+                <!-- Matches -->
+                <Link
+                    :href="route('players.index')"
+                    class="flex items-center space-x-2 px-2 py-2 rounded text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium"
+                >
+                    <Volleyball class="h-5 w-5" />
+                    <span>Wedstrijden</span>
                 </Link>
             </div>
 
