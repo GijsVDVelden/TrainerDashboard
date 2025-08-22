@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\EventController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Http\Request;
@@ -40,12 +41,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('active-team.set');
 
     // Players
-    Route::get('/players', [PlayerController::class, 'index'])->name('players.index');
-    Route::get('/players/create', [PlayerController::class, 'create'])->name('players.create');
-    Route::post('/players', [PlayerController::class, 'store'])->name('players.store');
-    Route::get('/players/{player}/edit', [PlayerController::class, 'edit'])->name('players.edit');
-    Route::put('/players/{player}', [PlayerController::class, 'update'])->name('players.update');
-    Route::delete('/players/{player}', [PlayerController::class, 'destroy'])->name('players.destroy');
+    Route::get('/spelers', [PlayerController::class, 'index'])->name('players.index');
+    Route::get('/spelers/create', [PlayerController::class, 'create'])->name('players.create');
+    Route::post('/spelers', [PlayerController::class, 'store'])->name('players.store');
+    Route::get('/spelers/{player}/edit', [PlayerController::class, 'edit'])->name('players.edit');
+    Route::put('/spelers/{player}', [PlayerController::class, 'update'])->name('players.update');
+    Route::delete('/spelers/{player}', [PlayerController::class, 'destroy'])->name('players.destroy');
+
+    // Events
+    Route::get('/trainingen', [EventController::class, 'practicesIndex'])
+        ->name('practices.index');
+    Route::get('/trainingen/create', [EventController::class, 'practicesCreate'])->name('practices.create');
+    Route::post('/trainingen', [EventController::class, 'practicesStore'])->name('practices.store');
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
