@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GameController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\PracticeController;
 use App\Http\Controllers\ProfileController;
@@ -39,17 +40,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/spelers/{player}', [PlayerController::class, 'update'])->name('players.update');
     Route::delete('/spelers/{player}', [PlayerController::class, 'destroy'])->name('players.destroy');
 
-    // Events
-    Route::get('/trainingen', [PracticeController::class, 'index'])
-        ->name('practices.index');
+    // Practices
+    Route::get('/trainingen', [PracticeController::class, 'index'])->name('practices.index');
     Route::get('/trainingen/create', [PracticeController::class, 'create'])->name('practices.create');
     Route::post('/trainingen', [PracticeController::class, 'store'])->name('practices.store');
 
+    // Matches
+    Route::get('/wedstrijden', [GameController::class, 'index'])->name('games.index');
+    Route::get('/wedstrijden/create', [GameController::class, 'create'])->name('games.create');
+    Route::post('/wedstrijden', [GameController::class, 'store'])->name('games.store');
+
     // Attendance
     Route::prefix('events/{event}')->group(function () {
-        Route::get('attendance', [AttendanceController::class, 'edit'])->name('attendance.edit');
-        Route::post('attendance', [AttendanceController::class, 'store'])->name('attendance.store');
-        Route::put('attendance', [AttendanceController::class, 'update'])->name('attendance.update');
+        Route::get('/aanwezigheid', [AttendanceController::class, 'edit'])->name('attendance.edit');
+        Route::post('/aanwezigheid', [AttendanceController::class, 'store'])->name('attendance.store');
+        Route::put('/aanwezigheid', [AttendanceController::class, 'update'])->name('attendance.update');
     });
 
     // Profile

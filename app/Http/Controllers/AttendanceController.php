@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AttendanceReason;
 use App\Enums\AttendanceStatus;
 use App\Models\Attendance;
 use App\Models\Event;
@@ -23,19 +24,19 @@ class AttendanceController extends Controller
             'event' => $event,
             'players' => $players,
             'attendances' => $attendances,
-            'statuses' => [
-                AttendanceStatus::PRESENT->value,
-                AttendanceStatus::ABSENT->value,
-                AttendanceStatus::LATE->value,
-            ],
+            'statuses' => collect(AttendanceStatus::cases())->map(fn($c) => $c->value),
+            'reasons'  => collect(AttendanceReason::cases())->map(fn($c) => $c->value),
         ]);
     }
+
     public function store(Request $request, Event $event)
     {
         $data = $request->validate([
             'attendances' => ['required', 'array'],
             'attendances.*.player_id' => ['required', 'exists:players,id'],
             'attendances.*.status' => ['required', new Enum(AttendanceStatus::class)],
+            'attendances.*.reason' => ['nullable', new Enum(AttendanceReason::class)],
+            'attendances.*.late' => ['sometimes', 'boolean'],
             'attendances.*.notes' => ['nullable', 'string'],
         ]);
 
@@ -47,6 +48,8 @@ class AttendanceController extends Controller
                 ],
                 [
                     'status' => $attendanceData['status'],
+                    'reason' => $attendanceData['reason'] ?? null,
+                    'late' => $attendanceData['late'] ?? false,
                     'notes' => $attendanceData['notes'] ?? null,
                 ]
             );

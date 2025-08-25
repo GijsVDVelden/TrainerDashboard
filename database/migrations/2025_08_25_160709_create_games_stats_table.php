@@ -11,17 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('attendances', function (Blueprint $table) {
+        Schema::create('game_player_stats', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('event_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('game_id')->constrained()->cascadeOnDelete();
             $table->foreignId('player_id')->constrained()->cascadeOnDelete();
-            $table->string('status');
-            $table->boolean('late')->default(false);
-            $table->string('reason')->nullable();
-            $table->text('notes')->nullable();
+            $table->unsignedInteger('goals')->default(0);
+            $table->unsignedInteger('assists')->default(0);
+            $table->unsignedInteger('yellow_cards')->default(0);
+            $table->unsignedInteger('red_cards')->default(0);
             $table->timestamps();
-
-            $table->unique(['event_id','player_id']);
         });
     }
 
@@ -30,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('attendance');
+        Schema::dropIfExists('games_stats');
     }
 };

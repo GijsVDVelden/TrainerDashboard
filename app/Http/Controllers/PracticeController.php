@@ -48,7 +48,6 @@ class PracticeController extends Controller
 
     public function create(Request $request)
     {
-        // Stel team_id voor: actief team of kies uit lijst
         $activeTeamId = optional($request->user())->active_team_id;
         return Inertia::render('Practices/Form', [
             'defaults' => [

@@ -11,7 +11,7 @@ const tabs = [
     { name: 'dashboard',        label: 'Dashboard',  icon: Home,      href: () => route('dashboard') },
     { name: 'players.*',        label: 'Spelers',    icon: Users,     href: () => route('players.index') },
     { name: 'practices.*',      label: 'Trainingen', icon: Goal,      href: () => route('practices.index') },
-    { name: 'matches.*',        label: 'Wedstrijden',icon: Volleyball, href: () => route('players.index') }, // zorg dat deze route bestaat
+    { name: 'games.*',        label: 'Wedstrijden',icon: Volleyball, href: () => route('games.index') },
     { name: 'settings',         label: 'Instellingen', icon: Settings, href: () => route('settings') },
 ]
 

@@ -25,4 +25,8 @@ class Player extends Model
     public function attendances() {
         return $this->hasMany(Attendance::class);
     }
+
+    public function gameStats() {
+        return $this->hasMany(GamePlayerStats::class);
+    }
 }

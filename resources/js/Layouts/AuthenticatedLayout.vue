@@ -116,7 +116,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
                     </Link>
 
                     <Link
-                        :href="route('players.index')"
+                        :href="route('games.index')"
                     class="flex items-center gap-2 px-2 py-2 rounded text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium"
                     >
                     <Volleyball class="h-5 w-5"/>
