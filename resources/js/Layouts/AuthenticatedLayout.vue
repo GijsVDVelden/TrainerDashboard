@@ -104,7 +104,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
                         class="flex items-center gap-2 px-2 py-2 rounded text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium"
                     >
                         <Users class="h-5 w-5"/>
-                        <span>Spelers</span>
+                        <span>Selectie</span>
                     </Link>
 
                     <Link

@@ -26,4 +26,9 @@ class Event extends Model
     {
         return $this->belongsTo(Team::class);
     }
+
+    public function game()
+    {
+        return $this->hasOne(Game::class);
+    }
 }

@@ -6,6 +6,7 @@ use App\Enums\PlayerPositions;
 use App\Http\Requests\PlayerRequest;
 use App\Models\Player;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -89,6 +90,22 @@ class PlayerController extends Controller
         ]);
 
         return redirect()->route('players.index')->with('success', 'Speler bijgewerkt.');
+    }
+
+    public function show(Player $player)
+    {
+        abort_unless($player->team_id === session('active_team_id'), 403);
+
+        $player->load([
+            'team',
+            'attendances.event',
+        ]);
+
+        return Inertia::render('Players/Show', [
+            'player'      => $player,
+            'stats'       => $player->aggregatedStats(),
+            'attendances' => $player->attendances,
+        ]);
     }
 
     public function destroy(Player $player): RedirectResponse

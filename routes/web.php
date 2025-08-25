@@ -27,6 +27,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('dashboard');
 
     Route::get('/instellingen', [DashboardController::class, 'settings'])->name('settings');
+    Route::post('/instellingen', [DashboardController::class, 'updateSettings'])->name('settings.update');
 
     // Active team
     Route::post('/active-team', [DashboardController::class, 'setActiveTeam'])
@@ -34,21 +35,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Players
     Route::get('/spelers', [PlayerController::class, 'index'])->name('players.index');
-    Route::get('/spelers/create', [PlayerController::class, 'create'])->name('players.create');
+    Route::get('/spelers/nieuw', [PlayerController::class, 'create'])->name('players.create');
     Route::post('/spelers', [PlayerController::class, 'store'])->name('players.store');
-    Route::get('/spelers/{player}/edit', [PlayerController::class, 'edit'])->name('players.edit');
+    Route::get('/spelers/{player}/bewerken', [PlayerController::class, 'edit'])->name('players.edit');
     Route::put('/spelers/{player}', [PlayerController::class, 'update'])->name('players.update');
+    Route::get('/spelers/{player}/stats', [PlayerController::class, 'show'])->name('players.show');
     Route::delete('/spelers/{player}', [PlayerController::class, 'destroy'])->name('players.destroy');
 
     // Practices
     Route::get('/trainingen', [PracticeController::class, 'index'])->name('practices.index');
-    Route::get('/trainingen/create', [PracticeController::class, 'create'])->name('practices.create');
+    Route::get('/trainingen/nieuw', [PracticeController::class, 'create'])->name('practices.create');
     Route::post('/trainingen', [PracticeController::class, 'store'])->name('practices.store');
 
     // Matches
     Route::get('/wedstrijden', [GameController::class, 'index'])->name('games.index');
-    Route::get('/wedstrijden/create', [GameController::class, 'create'])->name('games.create');
+    Route::get('/wedstrijden/nieuw', [GameController::class, 'create'])->name('games.create');
     Route::post('/wedstrijden', [GameController::class, 'store'])->name('games.store');
+    Route::get('/wedstrijden/{event}/evalueren', [GameController::class, 'evaluate'])->name('games.evaluate');
 
     // Attendance
     Route::prefix('events/{event}')->group(function () {

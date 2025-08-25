@@ -49,13 +49,23 @@ class AttendanceController extends Controller
                 [
                     'status' => $attendanceData['status'],
                     'reason' => $attendanceData['reason'] ?? null,
-                    'late' => $attendanceData['late'] ?? false,
-                    'notes' => $attendanceData['notes'] ?? null,
+                    'late'   => $attendanceData['late'] ?? false,
+                    'notes'  => $attendanceData['notes'] ?? null,
                 ]
             );
         }
 
-        return redirect()->route('practices.index', $event)
-            ->with('success', 'Aanwezigheid opgeslagen.');
+        if ($event->type === \App\Enums\EventType::Training) {
+            return redirect()->route('practices.index')
+                ->with('success', 'Aanwezigheid opgeslagen.');
+        }
+
+        if ($event->type === \App\Enums\EventType::Match) {
+            return redirect()->route('games.index')
+                ->with('success', 'Aanwezigheid opgeslagen.');
+        }
+
+        // fallback
+        return redirect()->back()->with('success', 'Aanwezigheid opgeslagen.');
     }
 }

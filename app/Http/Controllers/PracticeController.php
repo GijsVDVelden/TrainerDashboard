@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AttendanceStatus;
 use App\Http\Requests\PracticeRequest;
 use App\Models\Event;
 use App\Enums\EventType;
@@ -71,7 +72,7 @@ class PracticeController extends Controller
             return back()->withErrors(['team_id' => 'Geen team geselecteerd of actief.']);
         }
 
-        Event::create([
+        $event = Event::create([
             'team_id'   => $teamId,
             'type'      => \App\Enums\EventType::Training,
             'starts_at' => $data['starts_at'],
@@ -79,6 +80,19 @@ class PracticeController extends Controller
             'location'  => $data['location'] ?? null,
             'notes'     => $data['notes'] ?? null,
         ]);
+
+
+        $players = $event->team->players;
+
+        foreach ($players as $player) {
+            $event->attendances()->create([
+                'player_id' => $player->id,
+                'status'    => AttendanceStatus::PRESENT,
+                'reason'    => null,
+                'late'      => false,
+                'notes'     => null,
+            ]);
+        }
 
         return redirect()->route('practices.index')->with('success', 'Training aangemaakt.');
     }

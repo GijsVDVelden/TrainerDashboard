@@ -9,7 +9,7 @@ const current = computed(() => route().current())
 // Definieer de tabs hier centraal
 const tabs = [
     { name: 'dashboard',        label: 'Dashboard',  icon: Home,      href: () => route('dashboard') },
-    { name: 'players.*',        label: 'Spelers',    icon: Users,     href: () => route('players.index') },
+    { name: 'players.*',        label: 'Selectie',    icon: Users,     href: () => route('players.index') },
     { name: 'practices.*',      label: 'Trainingen', icon: Goal,      href: () => route('practices.index') },
     { name: 'games.*',        label: 'Wedstrijden',icon: Volleyball, href: () => route('games.index') },
     { name: 'settings',         label: 'Instellingen', icon: Settings, href: () => route('settings') },

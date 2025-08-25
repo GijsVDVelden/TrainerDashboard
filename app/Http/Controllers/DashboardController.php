@@ -70,4 +70,9 @@ class DashboardController extends Controller
     {
         return Inertia::render('Settings');
     }
+
+    public function storeSettings(Request $request)
+    {
+        // Validatie en opslaan van instellingen
+    }
 }
