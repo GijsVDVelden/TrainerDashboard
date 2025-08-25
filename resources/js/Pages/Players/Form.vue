@@ -34,7 +34,7 @@ function submit() {
     <AuthenticatedLayout>
         <div class="p-8 text-gray-900 bg-white rounded-lg shadow-sm space-y-6">
             <div class="flex justify-between items-center">
-                <h1 class="text-xl font-semibold">
+                <h1 class="text-2xl font-semibold">
                     {{ isEdit ? "Speler bewerken" : "Speler toevoegen" }}
                 </h1>
             </div>
@@ -96,7 +96,7 @@ function submit() {
                     <input
                         type="date"
                         v-model="form.birth_date"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md mb-2"
                         required
                     />
                     <p v-if="form.errors.birth_date" class="text-red-600 text-sm mt-1">
@@ -104,10 +104,8 @@ function submit() {
                     </p>
                 </div>
 
-                <!-- Buttons -->
                 <div class="flex gap-2">
-                    <button
-                        type="submit"
+                    <button type="submit"
                         class="px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 text-sm font-medium"
                     >
                         {{ isEdit ? "Speler bijwerken" : "Speler toevoegen" }}

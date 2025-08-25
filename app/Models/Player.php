@@ -21,4 +21,8 @@ class Player extends Model
     {
         return $this->belongsTo(Team::class);
     }
+
+    public function attendances() {
+        return $this->hasMany(Attendance::class);
+    }
 }

@@ -4,8 +4,8 @@ namespace App\Enums;
 
 enum AttendanceStatus : string
 {
-    case PRESENT     = 'Present';
-    case ABSENT      = 'Absent';
-    case LATE    = 'Late';
-    case UNKNOWN    = 'Unknown';
+    case PRESENT     = 'Aanwezig';
+    case ABSENT      = 'Afwezig';
+    case LATE    = 'Laat';
+    case SICK        = 'Ziek';
 }

@@ -18,4 +18,12 @@ class Event extends Model
         'type'      => EventType::class,
     ];
 
+    public function attendances() {
+        return $this->hasMany(Attendance::class);
+    }
+
+    public function team()
+    {
+        return $this->belongsTo(Team::class);
+    }
 }

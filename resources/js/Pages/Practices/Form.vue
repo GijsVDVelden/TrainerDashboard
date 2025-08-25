@@ -47,7 +47,7 @@ function toLocalInput(dt) {
     <AuthenticatedLayout>
         <div class="p-8 text-gray-900 bg-white rounded-lg shadow-sm space-y-6">
             <div class="flex justify-between items-center">
-                <h1 class="text-xl font-semibold">Training toevoegen</h1>
+                <h1 class="text-2xl font-semibold">Training toevoegen</h1>
             </div>
 
             <form @submit.prevent="submit" class="space-y-4">
@@ -90,7 +90,7 @@ function toLocalInput(dt) {
                     <textarea
                         v-model="form.notes"
                         rows="4"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md resize-none"
                         placeholder="Bijv. focus: positiespel, hesjes mee, ..."
                     />
                     <p v-if="form.errors.notes" class="text-red-600 text-sm mt-1">{{ form.errors.notes }}</p>

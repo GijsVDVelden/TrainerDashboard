@@ -1,7 +1,9 @@
 <?php
 
-use App\Http\Controllers\EventController;
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PlayerController;
+use App\Http\Controllers\PracticeController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -20,25 +22,14 @@ Route::get('/', fn () => redirect()->route('dashboard'));
 Route::middleware(['auth', 'verified'])->group(function () {
 
     // Dashboard
-    Route::get('/dashboard', fn () => Inertia::render('Dashboard'))
+    Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
 
-    Route::post('/active-team', function (Request $request) {
-        $validated = $request->validate([
-            'team_id' => ['required', 'exists:teams,id'],
-        ]);
+    Route::get('/instellingen', [DashboardController::class, 'settings'])->name('settings');
 
-        $allowed = $request->user()
-            ->teams()
-            ->whereKey($validated['team_id'])
-            ->exists();
-
-        abort_unless($allowed, 403, 'Je mag dit team niet selecteren.');
-
-        session(['active_team_id' => $validated['team_id']]);
-
-        return back();
-    })->name('active-team.set');
+    // Active team
+    Route::post('/active-team', [DashboardController::class, 'setActiveTeam'])
+        ->name('active-team.set');
 
     // Players
     Route::get('/spelers', [PlayerController::class, 'index'])->name('players.index');
@@ -49,10 +40,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/spelers/{player}', [PlayerController::class, 'destroy'])->name('players.destroy');
 
     // Events
-    Route::get('/trainingen', [EventController::class, 'practicesIndex'])
+    Route::get('/trainingen', [PracticeController::class, 'index'])
         ->name('practices.index');
-    Route::get('/trainingen/create', [EventController::class, 'practicesCreate'])->name('practices.create');
-    Route::post('/trainingen', [EventController::class, 'practicesStore'])->name('practices.store');
+    Route::get('/trainingen/create', [PracticeController::class, 'create'])->name('practices.create');
+    Route::post('/trainingen', [PracticeController::class, 'store'])->name('practices.store');
+
+    // Attendance
+    Route::prefix('events/{event}')->group(function () {
+        Route::get('attendance', [AttendanceController::class, 'edit'])->name('attendance.edit');
+        Route::post('attendance', [AttendanceController::class, 'store'])->name('attendance.store');
+        Route::put('attendance', [AttendanceController::class, 'update'])->name('attendance.update');
+    });
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

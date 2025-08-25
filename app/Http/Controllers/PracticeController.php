@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/EventController.php
 
 namespace App\Http\Controllers;
 
@@ -11,39 +10,43 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
-class EventController extends Controller
+class PracticeController extends Controller
 {
-    public function practicesIndex(Request $request)
+    public function index(Request $request)
     {
-        // Optioneel: filter op actief team als je dat hebt
-        $teamId = optional($request->user())->active_team_id ?? null;
+        $teamId = session('active_team_id');
+
+        if (!$teamId) {
+            return Inertia::render('Practices/Index', [
+                'events' => [],
+                'filter' => $request->query('filter', 'upcoming'),
+            ]);
+        }
+
+        $filter = $request->query('filter', 'upcoming'); // standaard upcoming
+        $now = now();
 
         $query = Event::query()
-            ->where('type', EventType::Training);
+            ->where('type', EventType::Training)
+            ->where('team_id', $teamId);
 
-        if ($teamId) {
-            $query->where('team_id', $teamId);
+        if ($filter === 'upcoming') {
+            $query->where('starts_at', '>=', $now->startOfDay());
+        } elseif ($filter === 'past') {
+            $query->where('starts_at', '<', $now->startOfDay());
         }
 
         $events = $query
             ->orderByDesc('starts_at')
-            ->paginate(25)
-            ->through(function (Event $e) {
-                return [
-                    'id'        => $e->id,
-                    'starts_at' => $e->starts_at,
-                    'ends_at'   => $e->ends_at,
-                    'location'  => $e->location,
-                    'notes'     => Str::limit((string) $e->notes, 120),
-                ];
-            });
+            ->get(); // geen paginate()
 
         return Inertia::render('Practices/Index', [
             'events' => $events,
+            'filter' => $filter,
         ]);
     }
 
-    public function practicesCreate(Request $request)
+    public function create(Request $request)
     {
         // Stel team_id voor: actief team of kies uit lijst
         $activeTeamId = optional($request->user())->active_team_id;
@@ -58,14 +61,12 @@ class EventController extends Controller
         ]);
     }
 
-    public function practicesStore(PracticeRequest $request)
+    public function store(PracticeRequest $request)
     {
-        Log::info('Incoming request data', $request->all());
 
         $data = $request->validated();
 
-        // pak actief team uit de sessie als team_id niet meegestuurd is
-        $teamId = $data['team_id'] ?? session('active_team_id');
+        $teamId = session('active_team_id');
 
         if (!$teamId) {
             return back()->withErrors(['team_id' => 'Geen team geselecteerd of actief.']);
@@ -80,7 +81,6 @@ class EventController extends Controller
             'notes'     => $data['notes'] ?? null,
         ]);
 
-        // Fix 3 — juiste route-naam gebruiken
         return redirect()->route('practices.index')->with('success', 'Training aangemaakt.');
     }
 
