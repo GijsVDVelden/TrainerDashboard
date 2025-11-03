@@ -113,14 +113,113 @@ class GameController extends Controller
 
     public function evaluate(Event $event)
     {
-        $event->load(['game.playerStats.player']);
+        $event->load(['game.playerStats.player', 'team.players']);
+
+        $game = $event->game;
+
+        // Zet goals/assists opnieuw in een array die de frontend verwacht
+        $goals = [];
+        foreach ($game->playerStats as $stat) {
+            for ($i = 0; $i < $stat->goals; $i++) {
+                $goals[] = [
+                    'scorer' => $stat->player_id,
+                    'assist' => null, // assist wordt apart gezet
+                ];
+            }
+            for ($i = 0; $i < $stat->assists; $i++) {
+                $goals[] = [
+                    'scorer' => null,
+                    'assist' => $stat->player_id,
+                ];
+            }
+        }
+
+        // Kaarten array zoals je formulier het verwacht
+        $cards = [];
+        foreach ($event->team->players as $player) {
+            $stat = $game->playerStats->firstWhere('player_id', $player->id);
+            $cards[$player->id] = [
+                'yellow' => $stat?->yellow_cards ?? 0,
+                'red'    => $stat?->red_cards ?? 0,
+            ];
+        }
 
         return Inertia::render('Games/Evaluate', [
-            'event' => $event,
-            'game'  => $event->game,
-            'players' => $event->team->players,
-            'stats'   => $event->game->playerStats->keyBy('player_id'),
+            'event'     => $event,
+            'game'      => $game,
+            'players'   => $event->team->players,
+            'stats'     => $game->playerStats->keyBy('player_id'),
+            'defaults'  => [
+                'our_score'      => $game->our_score ?? 0,
+                'opponent_score' => $game->opponent_score ?? 0,
+                'goals'          => $goals,
+                'cards'          => $cards,
+            ],
         ]);
     }
 
+
+    public function storeEvaluation(Request $request, Event $event)
+    {
+        $data = $request->validate([
+            'our_score'       => ['required', 'integer', 'min:0'],
+            'opponent_score'  => ['required', 'integer', 'min:0'],
+            'goals'           => ['array'],
+            'goals.*.scorer'  => ['nullable', 'exists:players,id'],
+            'goals.*.assist'  => ['nullable', 'exists:players,id'],
+            'cards'           => ['array'],
+            'cards.*.yellow'  => ['integer', 'min:0'],
+            'cards.*.red'     => ['integer', 'min:0'],
+        ]);
+
+        Log::info('Evaluatie data', $data);
+
+        $game = $event->game;
+
+        // ✅ Update de score in de game
+        $game->update([
+            'our_score'      => $data['our_score'],
+            'opponent_score' => $data['opponent_score'],
+        ]);
+
+        // ✅ Reset oude stats voor dit game
+        \App\Models\GamePlayerStats::where('game_id', $game->id)->delete();
+
+        // ✅ Doelpunten en assists
+        foreach ($data['goals'] ?? [] as $goal) {
+            if (!empty($goal['scorer'])) {
+                \App\Models\GamePlayerStats::create([
+                    'game_id'   => $game->id,
+                    'player_id' => $goal['scorer'],
+                    'goals'     => 1,
+                    'assists'   => !empty($goal['assist']) ? 1 : 0,
+                ]);
+
+                if (!empty($goal['assist']) && $goal['assist'] !== $goal['scorer']) {
+                    \App\Models\GamePlayerStats::create([
+                        'game_id'   => $game->id,
+                        'player_id' => $goal['assist'],
+                        'assists'   => 1,
+                    ]);
+                }
+            }
+        }
+
+        // ✅ Kaarten
+        foreach ($data['cards'] ?? [] as $playerId => $cards) {
+            if (($cards['yellow'] ?? 0) > 0 || ($cards['red'] ?? 0) > 0) {
+                \App\Models\GamePlayerStats::updateOrCreate(
+                    ['game_id' => $game->id, 'player_id' => $playerId],
+                    [
+                        'yellow_cards' => $cards['yellow'] ?? 0,
+                        'red_cards'    => $cards['red'] ?? 0,
+                    ]
+                );
+            }
+        }
+
+        return redirect()
+            ->route('games.index')
+            ->with('success', 'Wedstrijdstatistieken opgeslagen.');
+    }
 }

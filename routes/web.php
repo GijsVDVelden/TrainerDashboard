@@ -52,6 +52,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/wedstrijden/nieuw', [GameController::class, 'create'])->name('games.create');
     Route::post('/wedstrijden', [GameController::class, 'store'])->name('games.store');
     Route::get('/wedstrijden/{event}/evalueren', [GameController::class, 'evaluate'])->name('games.evaluate');
+    Route::put('/wedstrijden/{event}/evalueren', [GameController::class, 'storeEvaluation'])->name('games.storeEvaluation');
 
     // Attendance
     Route::prefix('events/{event}')->group(function () {

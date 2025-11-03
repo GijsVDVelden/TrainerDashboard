@@ -1,5 +1,6 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import PageHeader from "@/Components/PageHeader.vue";
 import { Head, Link } from "@inertiajs/vue3";
 
 const props = defineProps({
@@ -30,9 +31,12 @@ function isActive(val) {
 <template>
     <Head title="Trainingen" />
     <AuthenticatedLayout>
-        <div class="p-8 text-gray-900 bg-white rounded-lg shadow-sm space-y-6">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <h1 class="text-2xl font-semibold">Trainingen</h1>
+        <div class="space-y-6">
+
+            <PageHeader title="Trainingen" />
+
+            <div class="p-6 bg-white rounded-lg shadow-sm">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
 
                 <!-- Filter tabs -->
                 <div class="inline-flex rounded-md border border-gray-200 overflow-hidden">
@@ -104,6 +108,7 @@ function isActive(val) {
                     </tr>
                     </tbody>
                 </table>
+            </div>
             </div>
         </div>
     </AuthenticatedLayout>

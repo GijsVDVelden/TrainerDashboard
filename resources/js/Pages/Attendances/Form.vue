@@ -55,15 +55,16 @@ function submit() {
 <template>
     <Head :title="`Aanwezigheid - ${event.type} ${event.starts_at}`" />
     <AuthenticatedLayout>
-        <div class="p-8 text-gray-900 bg-white rounded-lg shadow-sm space-y-6">
-            <div class="flex justify-between items-center">
-                <h1 class="text-2xl font-semibold">
-                    Aanwezigheid voor {{ event.type }}
-                    {{ new Date(event.starts_at).toLocaleDateString("nl-NL") }}
-                </h1>
-            </div>
+        <div class="space-y-6">
+            <div class="p-6 bg-white rounded-lg shadow-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-2xl font-semibold">
+                        Aanwezigheid voor {{ event.type }}
+                        {{ new Date(event.starts_at).toLocaleDateString("nl-NL") }}
+                    </h1>
+                </div>
 
-            <form @submit.prevent="submit" class="space-y-6">
+                <form @submit.prevent="submit" class="space-y-4">
                 <div class="overflow-hidden border border-gray-200 rounded-lg">
                     <table class="w-full">
                         <thead>
@@ -190,6 +191,7 @@ function submit() {
                     </a>
                 </div>
             </form>
+            </div>
         </div>
     </AuthenticatedLayout>
 </template>

@@ -15,17 +15,39 @@ const props = defineProps({
     },
 });
 
+// Helper functie om datetime op te splitsen
+function splitDateTime(datetime) {
+    if (!datetime) return { date: "", time: "" };
+    const d = new Date(datetime);
+    const date = d.toISOString().split('T')[0];
+    const time = d.toTimeString().slice(0, 5);
+    return { date, time };
+}
+
+const startDateTime = splitDateTime(props.defaults.starts_at);
+const endDateTime = splitDateTime(props.defaults.ends_at);
+
 const form = useForm({
     team_id: props.defaults.team_id ?? "",
-    starts_at: props.defaults.starts_at ?? "",
-    ends_at: props.defaults.ends_at ?? "",
+    practice_date: startDateTime.date,
+    start_time: startDateTime.time,
+    end_time: endDateTime.time,
     location: props.defaults.location ?? "",
     notes: props.defaults.notes ?? "",
 });
 
 function submit() {
-    console.log("Form data:", form);
-    form.post(route("practices.store"));
+    // Combineer datum en tijden tot datetime strings
+    const submitData = {
+        team_id: form.team_id,
+        starts_at: form.practice_date && form.start_time ? `${form.practice_date} ${form.start_time}` : null,
+        ends_at: form.practice_date && form.end_time ? `${form.practice_date} ${form.end_time}` : null,
+        location: form.location,
+        notes: form.notes,
+    };
+    
+    console.log("Form data:", submitData);
+    form.transform(() => submitData).post(route("practices.store"));
 }
 
 
@@ -45,36 +67,49 @@ function toLocalInput(dt) {
 <template>
     <Head title="Training toevoegen" />
     <AuthenticatedLayout>
-        <div class="p-8 text-gray-900 bg-white rounded-lg shadow-sm space-y-6">
-            <div class="flex justify-between items-center">
-                <h1 class="text-2xl font-semibold">Training toevoegen</h1>
-            </div>
+        <div class="space-y-6">
+            <div class="p-6 bg-white rounded-lg shadow-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-2xl font-semibold">Training toevoegen</h1>
+                </div>
 
-            <form @submit.prevent="submit" class="space-y-4">
+                <form @submit.prevent="submit" class="space-y-4">
 
                 <input v-if="form.team_id && teams.length === 0" type="hidden" v-model="form.team_id" />
 
-                <!-- Start -->
+                <!-- Datum -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Start</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Datum</label>
                     <input
-                        type="datetime-local"
-                        v-model="form.starts_at"
+                        type="date"
+                        v-model="form.practice_date"
                         class="w-full px-3 py-2 border border-gray-300 rounded-md"
                         required
                     />
-                    <p v-if="form.errors.starts_at" class="text-red-600 text-sm mt-1">{{ form.errors.starts_at }}</p>
+                    <p v-if="form.errors.practice_date" class="text-red-600 text-sm mt-1">{{ form.errors.practice_date }}</p>
                 </div>
 
-                <!-- Einde -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Einde</label>
-                    <input
-                        type="datetime-local"
-                        v-model="form.ends_at"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    />
-                    <p v-if="form.errors.ends_at" class="text-red-600 text-sm mt-1">{{ form.errors.ends_at }}</p>
+                <!-- Begintijd en Eindtijd -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Begintijd</label>
+                        <input
+                            type="time"
+                            v-model="form.start_time"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            required
+                        />
+                        <p v-if="form.errors.start_time" class="text-red-600 text-sm mt-1">{{ form.errors.start_time }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Eindtijd</label>
+                        <input
+                            type="time"
+                            v-model="form.end_time"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        />
+                        <p v-if="form.errors.end_time" class="text-red-600 text-sm mt-1">{{ form.errors.end_time }}</p>
+                    </div>
                 </div>
 
                 <!-- Locatie -->
@@ -110,6 +145,7 @@ function toLocalInput(dt) {
                     </a>
                 </div>
             </form>
+            </div>
         </div>
     </AuthenticatedLayout>
 </template>
