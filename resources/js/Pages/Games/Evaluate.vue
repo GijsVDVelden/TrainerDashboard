@@ -3,7 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import PageHeader from '@/Components/PageHeader.vue'
 import { Head, useForm } from '@inertiajs/vue3'
 import { watch } from 'vue'
-import { Square } from 'lucide-vue-next'
+import { Save, X } from 'lucide-vue-next'
 import {data} from "autoprefixer";
 
 const props = defineProps({
@@ -58,30 +58,30 @@ function submit() {
             />
 
             <!-- Inhoud -->
-            <div class="p-6 bg-white rounded-lg shadow-sm">
+            <div class="p-4 sm:p-6 bg-white rounded-lg shadow-sm">
                 <form @submit.prevent="submit" class="space-y-4">
 
                 <!-- Scoreboard -->
                 <div>
                     <h2 class="text-lg font-semibold mb-3">Uitslag</h2>
-                    <div class="flex justify-center items-center gap-6">
+                    <div class="flex justify-center items-center gap-4 sm:gap-6">
                         <div class="text-center">
-                            <p class="text-sm text-gray-600 mb-1">DTS</p>
+                            <p class="text-xs sm:text-sm text-gray-600 mb-1">DTS</p>
                             <input
                                 type="number"
                                 min="0"
                                 v-model="form.our_score"
-                                class="w-20 text-3xl font-bold text-center border rounded-md focus:ring-2 focus:ring-blue-400"
+                                class="w-16 sm:w-20 text-2xl sm:text-3xl font-bold text-center border rounded-md focus:ring-2 focus:ring-blue-400"
                             />
                         </div>
-                        <span class="text-3xl font-bold text-gray-700">–</span>
+                        <span class="text-2xl sm:text-3xl font-bold text-gray-700">–</span>
                         <div class="text-center">
-                            <p class="text-sm text-gray-600 mb-1">Tegenstander</p>
+                            <p class="text-xs sm:text-sm text-gray-600 mb-1">Tegenstander</p>
                             <input
                                 type="number"
                                 min="0"
                                 v-model="form.opponent_score"
-                                class="w-20 text-3xl font-bold text-center border rounded-md focus:ring-2 focus:ring-blue-400"
+                                class="w-16 sm:w-20 text-2xl sm:text-3xl font-bold text-center border rounded-md focus:ring-2 focus:ring-blue-400"
                             />
                         </div>
                     </div>
@@ -177,15 +177,17 @@ function submit() {
                 <div class="flex gap-2">
                     <button
                         type="submit"
-                        class="px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 text-sm font-medium"
+                        class="px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 text-sm font-medium inline-flex items-center gap-2"
                     >
+                        <Save :size="16" />
                         Opslaan
                     </button>
                     <a
                         href="#"
                         onclick="history.back(); return false;"
-                        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-sm font-medium"
+                        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-sm font-medium inline-flex items-center gap-2"
                     >
+                        <X :size="16" />
                         Annuleren
                     </a>
                 </div>

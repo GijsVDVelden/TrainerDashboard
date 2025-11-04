@@ -1,6 +1,8 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import PageHeader from "@/Components/PageHeader.vue";
 import { Head, useForm } from "@inertiajs/vue3";
+import { Save, X } from "lucide-vue-next";
 
 const props = defineProps({
     event: Object,
@@ -56,16 +58,110 @@ function submit() {
     <Head :title="`Aanwezigheid - ${event.type} ${event.starts_at}`" />
     <AuthenticatedLayout>
         <div class="space-y-6">
-            <div class="p-6 bg-white rounded-lg shadow-sm">
-                <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-2xl font-semibold">
-                        Aanwezigheid voor {{ event.type }}
-                        {{ new Date(event.starts_at).toLocaleDateString("nl-NL") }}
-                    </h1>
-                </div>
-
+            <PageHeader 
+                :title="`Aanwezigheid voor ${event.type} - ${new Date(event.starts_at).toLocaleDateString('nl-NL')}`"
+                :back-route="event.type === 'Wedstrijd' ? route('games.index') : route('practices.index')"
+            />
+            
+            <div class="p-4 sm:p-6 bg-white rounded-lg shadow-sm">
                 <form @submit.prevent="submit" class="space-y-4">
-                <div class="overflow-hidden border border-gray-200 rounded-lg">
+                    
+                    <!-- Mobile Cards (hidden on lg+) -->
+                    <div class="lg:hidden space-y-4">
+                        <div
+                            v-for="row in form.attendances"
+                            :key="row.player_id"
+                            class="border border-gray-200 rounded-lg p-4 space-y-3"
+                        >
+                            <h3 class="font-semibold">
+                                {{ players.find(p => p.id === row.player_id)?.first_name }}
+                                {{ players.find(p => p.id === row.player_id)?.last_name }}
+                            </h3>
+                            
+                            <!-- Status -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                                <div class="flex gap-2">
+                                    <button
+                                        type="button"
+                                        @click="setStatus(row.player_id, 'Aanwezig')"
+                                        :class="[
+                                            'flex-1 px-3 py-2 rounded-md text-sm font-medium',
+                                            row.status === 'Aanwezig'
+                                                ? 'bg-green-600 text-white'
+                                                : 'bg-green-100 text-green-700'
+                                        ]"
+                                    >
+                                        Aanwezig
+                                    </button>
+                                    <button
+                                        type="button"
+                                        @click="setStatus(row.player_id, 'Afwezig')"
+                                        :class="[
+                                            'flex-1 px-3 py-2 rounded-md text-sm font-medium',
+                                            row.status === 'Afwezig'
+                                                ? 'bg-red-600 text-white'
+                                                : 'bg-red-100 text-red-700'
+                                        ]"
+                                    >
+                                        Afwezig
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Te laat -->
+                            <div v-if="row.status === 'Aanwezig'">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Te laat</label>
+                                <button
+                                    type="button"
+                                    @click="toggleLate(row.player_id)"
+                                    :class="[
+                                        'w-full px-3 py-2 rounded-md text-sm font-medium',
+                                        row.late
+                                            ? 'bg-yellow-600 text-white'
+                                            : 'bg-yellow-100 text-yellow-700'
+                                    ]"
+                                >
+                                    {{ row.late ? 'Ja' : 'Nee' }}
+                                </button>
+                            </div>
+
+                            <!-- Reden -->
+                            <div v-if="row.status === 'Afwezig'">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Reden</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button
+                                        v-for="reason in reasons"
+                                        :key="reason"
+                                        type="button"
+                                        @click="setReason(row.player_id, reason)"
+                                        :class="[
+                                            'px-3 py-2 rounded-md text-sm font-medium',
+                                            row.reason === reason
+                                                ? 'bg-blue-600 text-white'
+                                                : 'bg-blue-100 text-blue-700'
+                                        ]"
+                                    >
+                                        {{ reason }}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Notities -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Notities</label>
+                                <input
+                                    type="text"
+                                    v-model="row.notes"
+                                    placeholder="Optionele notitie"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Desktop Table (hidden on mobile) -->
+                <div class="hidden lg:block overflow-hidden border border-gray-200 rounded-lg">
                     <table class="w-full">
                         <thead>
                         <tr class="bg-gray-50 text-left">
@@ -178,15 +274,17 @@ function submit() {
                 <div class="flex gap-2">
                     <button
                         type="submit"
-                        class="px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 text-sm font-medium"
+                        class="px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 text-sm font-medium inline-flex items-center gap-2"
                     >
+                        <Save :size="16" />
                         Aanwezigheid opslaan
                     </button>
                     <a
                         href="#"
                         onclick="history.back(); return false;"
-                        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-sm font-medium"
+                        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-sm font-medium inline-flex items-center gap-2"
                     >
+                        <X :size="16" />
                         Annuleren
                     </a>
                 </div>

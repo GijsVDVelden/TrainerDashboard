@@ -1,7 +1,8 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import PageHeader from "@/Components/PageHeader.vue";
-import { Head, useForm } from "@inertiajs/vue3";
+import { Head, useForm, Link } from "@inertiajs/vue3";
+import { Save, X } from "lucide-vue-next";
 
 const props = defineProps({
     positions: Array, // [{ key: "Keeper", label: "Keeper" }, ...]
@@ -30,13 +31,13 @@ function submit() {
 </script>
 
 <template>
-    <Head :title="isEdit ? 'Speler bewerken' : 'Speler toevoegen'" />
+    <Head :title="isEdit ? 'Speler bewerken' : 'Nieuwe speler'" />
 
     <AuthenticatedLayout>
         <div class="space-y-6">
 
             <PageHeader
-                :title="isEdit ? 'Speler bewerken' : 'Speler toevoegen'"
+                :title="isEdit ? 'Speler bewerken' : 'Nieuwe speler'"
                 :back-route="route('players.index')"
             />
 
@@ -109,14 +110,16 @@ function submit() {
                     <div class="flex gap-2">
                         <button
                             type="submit"
-                            class="px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 text-sm font-medium"
+                            class="px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 text-sm font-medium inline-flex items-center gap-2"
                         >
+                            <Save :size="16" />
                             {{ isEdit ? "Speler bijwerken" : "Speler toevoegen" }}
                         </button>
                         <Link
                             :href="route('players.index')"
-                            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-sm font-medium"
+                            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-sm font-medium inline-flex items-center gap-2"
                         >
+                            <X :size="16" />
                             Annuleren
                         </Link>
                     </div>

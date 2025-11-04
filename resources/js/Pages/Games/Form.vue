@@ -1,7 +1,9 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import PageHeader from "@/Components/PageHeader.vue";
 import { Head, useForm } from "@inertiajs/vue3";
 import { watch } from "vue";
+import { Save, X } from "lucide-vue-next";
 
 const props = defineProps({
     defaults: {
@@ -66,14 +68,15 @@ function submit() {
 </script>
 
 <template>
-    <Head title="Wedstrijd toevoegen" />
+    <Head title="Nieuwe wedstrijd" />
     <AuthenticatedLayout>
         <div class="space-y-6">
-            <div class="p-6 bg-white rounded-lg shadow-sm">
-                <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-2xl font-semibold">Wedstrijd toevoegen</h1>
-                </div>
-
+            <PageHeader 
+                title="Nieuwe wedstrijd"
+                :back-route="route('games.index')"
+            />
+            
+            <div class="p-4 sm:p-6 bg-white rounded-lg shadow-sm">
                 <form @submit.prevent="submit" class="space-y-4">
                     <input type="hidden" v-model="form.team_id" />
 
@@ -179,15 +182,17 @@ function submit() {
                     <div class="flex gap-2">
                         <button
                             type="submit"
-                            class="px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 text-sm font-medium"
+                            class="px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 text-sm font-medium inline-flex items-center gap-2"
                         >
+                            <Save :size="16" />
                             Wedstrijd opslaan
                         </button>
                         <a
                             href="#"
                             onclick="history.back(); return false;"
-                            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-sm font-medium"
+                            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-sm font-medium inline-flex items-center gap-2"
                         >
+                            <X :size="16" />
                             Annuleren
                         </a>
                     </div>

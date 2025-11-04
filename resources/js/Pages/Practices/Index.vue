@@ -2,6 +2,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import PageHeader from "@/Components/PageHeader.vue";
 import { Head, Link } from "@inertiajs/vue3";
+import { Plus, Users } from "lucide-vue-next";
 
 const props = defineProps({
     events: Array,   // gewone array, geen paginator meer
@@ -35,15 +36,15 @@ function isActive(val) {
 
             <PageHeader title="Trainingen" />
 
-            <div class="p-6 bg-white rounded-lg shadow-sm">
+            <div class="p-4 sm:p-6 bg-white rounded-lg shadow-sm">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
 
                 <!-- Filter tabs -->
-                <div class="inline-flex rounded-md border border-gray-200 overflow-hidden">
+                <div class="inline-flex w-full sm:w-auto rounded-md border border-gray-200 overflow-hidden">
                     <Link
                         :href="route('practices.index', { filter: 'upcoming' })"
                         :class="[
-                            'px-3 py-1.5 text-sm font-medium',
+                            'flex-1 sm:flex-none px-3 py-1.5 text-sm font-medium text-center',
                             isActive('upcoming') ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
                         ]"
                     >
@@ -52,7 +53,7 @@ function isActive(val) {
                     <Link
                         :href="route('practices.index', { filter: 'past' })"
                         :class="[
-                            'px-3 py-1.5 text-sm font-medium border-l border-gray-200',
+                            'flex-1 sm:flex-none px-3 py-1.5 text-sm font-medium border-l border-gray-200 text-center',
                             isActive('past') ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
                         ]"
                     >
@@ -63,13 +64,59 @@ function isActive(val) {
                 <!-- Nieuwe training -->
                 <Link
                     :href="route('practices.create', { type: 'training' })"
-                    class="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 font-medium"
+                    class="inline-flex items-center justify-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 font-medium gap-2"
                 >
+                    <Plus :size="18" />
                     Nieuwe training
                 </Link>
             </div>
 
-            <div class="overflow-hidden border border-gray-200 rounded-lg">
+            <!-- Mobile Cards (hidden on lg+) -->
+            <div class="lg:hidden space-y-4">
+                <div
+                    v-for="ev in events"
+                    :key="ev.id"
+                    class="border border-gray-200 rounded-lg p-4 space-y-3"
+                >
+                    <div>
+                        <h3 class="font-semibold text-lg">Training</h3>
+                        <p class="text-sm text-gray-600">{{ fmtDate(ev.starts_at) }}</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                            <span class="text-gray-600">Start:</span>
+                            <p class="font-medium">{{ fmtTime(ev.starts_at) }}</p>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Einde:</span>
+                            <p class="font-medium">{{ fmtTime(ev.ends_at) }}</p>
+                        </div>
+                        <div class="col-span-2">
+                            <span class="text-gray-600">Locatie:</span>
+                            <p class="font-medium">{{ ev.location ?? "-" }}</p>
+                        </div>
+                        <div v-if="ev.notes" class="col-span-2">
+                            <span class="text-gray-600">Notities:</span>
+                            <p class="font-medium">{{ ev.notes }}</p>
+                        </div>
+                    </div>
+                    <div class="pt-2 border-t border-gray-200">
+                        <Link
+                            :href="route('attendance.edit', ev.id)"
+                            class="inline-flex items-center justify-center w-full px-3 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 font-medium text-sm gap-2"
+                        >
+                            <Users :size="16" />
+                            Aanwezigheid
+                        </Link>
+                    </div>
+                </div>
+                <div v-if="events.length === 0" class="px-4 py-6 text-center text-gray-500">
+                    Geen trainingen gevonden.
+                </div>
+            </div>
+
+            <!-- Desktop Table (hidden on mobile) -->
+            <div class="hidden lg:block overflow-hidden border border-gray-200 rounded-lg">
                 <table class="w-full">
                     <thead>
                     <tr class="bg-gray-50 text-left">
@@ -94,8 +141,9 @@ function isActive(val) {
                         <td class="px-4 py-2">
                             <Link
                                 :href="route('attendance.edit', ev.id)"
-                                class="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 font-medium"
+                                class="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 font-medium gap-1"
                             >
+                                <Users :size="16" />
                                 Aanwezigheid
                             </Link>
                         </td>

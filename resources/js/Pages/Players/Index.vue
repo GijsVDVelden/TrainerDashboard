@@ -1,7 +1,10 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import PageHeader from "@/Components/PageHeader.vue";
+import ConfirmModal from "@/Components/ConfirmModal.vue";
 import { Link, useForm } from "@inertiajs/vue3";
+import { Plus, Edit, Trash2, BarChart3 } from "lucide-vue-next";
+import { ref } from "vue";
 
 const props = defineProps({
     players: Array,
@@ -9,11 +12,28 @@ const props = defineProps({
 });
 
 const destroyForm = useForm({});
+const showDeleteModal = ref(false);
+const playerToDelete = ref(null);
 
-function destroyPlayer(id) {
-    if (confirm("Weet je zeker dat je deze speler wilt verwijderen?")) {
-        destroyForm.delete(route("players.destroy", id));
+function confirmDelete(player) {
+    playerToDelete.value = player;
+    showDeleteModal.value = true;
+}
+
+function destroyPlayer() {
+    if (playerToDelete.value) {
+        destroyForm.delete(route("players.destroy", playerToDelete.value.id), {
+            onSuccess: () => {
+                showDeleteModal.value = false;
+                playerToDelete.value = null;
+            }
+        });
     }
+}
+
+function cancelDelete() {
+    showDeleteModal.value = false;
+    playerToDelete.value = null;
 }
 </script>
 
@@ -27,9 +47,10 @@ function destroyPlayer(id) {
                 <div class="w-full flex justify-end items-center mb-6">
                     <Link
                         :href="route('players.create')"
-                        class="items-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 font-medium"
+                        class="items-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 font-medium inline-flex gap-2"
                     >
-                        Speler toevoegen
+                        <Plus :size="18" />
+                        Nieuwe speler
                     </Link>
                 </div>
 
@@ -62,14 +83,16 @@ function destroyPlayer(id) {
                         <div class="mt-3 flex gap-2">
                             <Link
                                 :href="route('players.edit', player.id)"
-                                class="flex-1 px-3 py-1.5 text-center rounded-md bg-amber-100 text-amber-700 hover:bg-amber-200 font-medium text-sm"
+                                class="flex-1 px-3 py-1.5 text-center rounded-md bg-amber-100 text-amber-700 hover:bg-amber-200 font-medium text-sm inline-flex items-center justify-center gap-1"
                             >
+                                <Edit :size="16" />
                                 Bewerken
                             </Link>
                             <button
-                                class="flex-1 px-3 py-1.5 rounded-md bg-red-100 text-red-700 hover:bg-red-200 font-medium text-sm"
-                                @click="destroyPlayer(player.id)"
+                                class="flex-1 px-3 py-1.5 rounded-md bg-red-100 text-red-700 hover:bg-red-200 font-medium text-sm inline-flex items-center justify-center gap-1"
+                                @click="confirmDelete(player)"
                             >
+                                <Trash2 :size="16" />
                                 Verwijderen
                             </button>
                         </div>
@@ -106,20 +129,23 @@ function destroyPlayer(id) {
                                 <div class="flex justify-center gap-2">
                                     <Link
                                         :href="route('players.show', player.id)"
-                                        class="px-3 py-1.5 rounded-md bg-green-100 text-green-700 hover:bg-green-200 font-medium"
+                                        class="px-3 py-1.5 rounded-md bg-green-100 text-green-700 hover:bg-green-200 font-medium inline-flex items-center gap-1"
                                     >
+                                        <BarChart3 :size="16" />
                                         Statistieken
                                     </Link>
                                     <Link
                                         :href="route('players.edit', player.id)"
-                                        class="px-3 py-1.5 rounded-md bg-amber-100 text-amber-700 hover:bg-amber-200 font-medium"
+                                        class="px-3 py-1.5 rounded-md bg-amber-100 text-amber-700 hover:bg-amber-200 font-medium inline-flex items-center gap-1"
                                     >
+                                        <Edit :size="16" />
                                         Bewerken
                                     </Link>
                                     <button
-                                        class="px-3 py-1.5 rounded-md bg-red-100 text-red-700 hover:bg-red-200 font-medium"
-                                        @click="destroyPlayer(player.id)"
+                                        class="px-3 py-1.5 rounded-md bg-red-100 text-red-700 hover:bg-red-200 font-medium inline-flex items-center gap-1"
+                                        @click="confirmDelete(player)"
                                     >
+                                        <Trash2 :size="16" />
                                         Verwijderen
                                     </button>
                                 </div>
@@ -130,5 +156,20 @@ function destroyPlayer(id) {
                 </div>
             </div>
         </div>
+
+        <!-- Delete Confirmation Modal -->
+        <ConfirmModal
+            :show="showDeleteModal"
+            type="danger"
+            title="Speler verwijderen"
+            confirm-text="Verwijderen"
+            cancel-text="Annuleren"
+            @confirm="destroyPlayer"
+            @cancel="cancelDelete"
+        >
+            <template #message>
+                Weet je zeker dat je <strong>{{ playerToDelete?.first_name }} {{ playerToDelete?.last_name }}</strong> wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+            </template>
+        </ConfirmModal>
     </AuthenticatedLayout>
 </template>
