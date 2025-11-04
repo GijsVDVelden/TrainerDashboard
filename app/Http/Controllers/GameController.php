@@ -31,9 +31,27 @@ class GameController extends Controller
             ->with('game'); // << hier game-relatie laden
 
         if ($filter === 'upcoming') {
-            $query->where('starts_at', '>=', $now->startOfDay());
+            // Gebruik ends_at als die er is, anders starts_at
+            $query->where(function($q) use ($now) {
+                $q->where(function($subQ) use ($now) {
+                    $subQ->whereNotNull('ends_at')
+                         ->where('ends_at', '>=', $now);
+                })->orWhere(function($subQ) use ($now) {
+                    $subQ->whereNull('ends_at')
+                         ->where('starts_at', '>=', $now);
+                });
+            });
         } elseif ($filter === 'past') {
-            $query->where('starts_at', '<', $now->startOfDay());
+            // Gebruik ends_at als die er is, anders starts_at
+            $query->where(function($q) use ($now) {
+                $q->where(function($subQ) use ($now) {
+                    $subQ->whereNotNull('ends_at')
+                         ->where('ends_at', '<', $now);
+                })->orWhere(function($subQ) use ($now) {
+                    $subQ->whereNull('ends_at')
+                         ->where('starts_at', '<', $now);
+                });
+            });
         }
 
         $events = $query
@@ -109,6 +127,62 @@ class GameController extends Controller
         return redirect()
             ->route('games.index')
             ->with('success', 'Wedstrijd succesvol aangemaakt!');
+    }
+
+    public function edit(Event $event)
+    {
+        // Blokkeer bewerken van verlopen evenementen (kijk naar eindtijd)
+        $checkTime = $event->ends_at ?? $event->starts_at;
+        if ($checkTime < now()) {
+            return redirect()
+                ->route('games.index')
+                ->with('error', 'Verlopen wedstrijden kunnen niet meer bewerkt worden.');
+        }
+        
+        $event->load('game');
+
+        return Inertia::render('Games/Form', [
+            'event' => $event,
+            'defaults' => [
+                'team_id'   => $event->team_id,
+                'starts_at' => $event->starts_at,
+                'ends_at'   => $event->ends_at,
+                'location'  => $event->location,
+                'opponent'  => $event->game->opponent,
+                'home'      => $event->game->home,
+                'notes'     => $event->notes,
+            ],
+        ]);
+    }
+
+    public function update(Request $request, Event $event)
+    {
+        $data = $request->validate([
+            'starts_at' => ['required', 'date'],
+            'ends_at'   => ['nullable', 'date', 'after_or_equal:starts_at'],
+            'location'  => ['nullable', 'string', 'max:255'],
+            'opponent'  => ['required', 'string', 'max:255'],
+            'home'      => ['required', 'boolean'],
+            'notes'     => ['nullable', 'string'],
+        ]);
+
+        // Update het Event
+        $event->update([
+            'starts_at' => $data['starts_at'],
+            'ends_at'   => $data['ends_at'],
+            'location'  => $data['location'],
+            'notes'     => $data['notes'],
+        ]);
+
+        // Update de game-specifieke info
+        $event->game->update([
+            'opponent' => $data['opponent'],
+            'home'     => $data['home'],
+        ]);
+
+        return redirect()
+            ->route('games.index')
+            ->with('success', 'Wedstrijd succesvol bijgewerkt!');
     }
 
     public function evaluate(Event $event)

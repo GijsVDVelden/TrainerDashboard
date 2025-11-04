@@ -5,6 +5,10 @@ import { Head, useForm } from "@inertiajs/vue3";
 import { Save, X } from "lucide-vue-next";
 
 const props = defineProps({
+    event: {
+        type: Object,
+        default: null,
+    },
     defaults: {
         type: Object,
         default: () => ({
@@ -49,7 +53,12 @@ function submit() {
     };
     
     console.log("Form data:", submitData);
-    form.transform(() => submitData).post(route("practices.store"));
+    
+    if (props.event) {
+        form.transform(() => submitData).put(route("practices.update", props.event.id));
+    } else {
+        form.transform(() => submitData).post(route("practices.store"));
+    }
 }
 
 
@@ -67,11 +76,11 @@ function toLocalInput(dt) {
 </script>
 
 <template>
-    <Head title="Nieuwe training" />
+    <Head :title="event ? 'Training bewerken' : 'Nieuwe training'" />
     <AuthenticatedLayout>
         <div class="space-y-6">
             <PageHeader 
-                title="Nieuwe training"
+                :title="event ? 'Training bewerken' : 'Nieuwe training'"
                 :back-route="route('practices.index')"
             />
             

@@ -1,13 +1,40 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import PageHeader from "@/Components/PageHeader.vue";
-import { Head, Link } from "@inertiajs/vue3";
-import { Plus, Users } from "lucide-vue-next";
+import ConfirmModal from "@/Components/ConfirmModal.vue";
+import { Head, Link, useForm } from "@inertiajs/vue3";
+import { Plus, Users, Edit, Trash2 } from "lucide-vue-next";
+import { ref } from "vue";
 
 const props = defineProps({
     events: Array,   // gewone array, geen paginator meer
     filter: String,  // 'upcoming' | 'past' (of undefined)
 });
+
+const deleteForm = useForm({});
+const showDeleteModal = ref(false);
+const eventToDelete = ref(null);
+
+function confirmDelete(event) {
+    eventToDelete.value = event;
+    showDeleteModal.value = true;
+}
+
+function destroyEvent() {
+    if (eventToDelete.value) {
+        deleteForm.delete(route("events.destroy", eventToDelete.value.id), {
+            onSuccess: () => {
+                showDeleteModal.value = false;
+                eventToDelete.value = null;
+            }
+        });
+    }
+}
+
+function cancelDelete() {
+    showDeleteModal.value = false;
+    eventToDelete.value = null;
+}
 
 // Datum formatter
 function fmtDate(dt) {
@@ -26,6 +53,12 @@ function fmtTime(dt) {
 // Helper voor actieve tab
 function isActive(val) {
     return (props.filter ?? "upcoming") === val;
+}
+
+// Check of evenement verlopen is (gebruik ends_at of starts_at als er geen eindtijd is)
+function isPast(event) {
+    const checkTime = event.ends_at || event.starts_at;
+    return new Date(checkTime) < new Date();
 }
 </script>
 
@@ -100,14 +133,35 @@ function isActive(val) {
                             <p class="font-medium">{{ ev.notes }}</p>
                         </div>
                     </div>
-                    <div class="pt-2 border-t border-gray-200">
+                    <div class="flex flex-col gap-2 pt-2 border-t border-gray-200">
                         <Link
                             :href="route('attendance.edit', ev.id)"
-                            class="inline-flex items-center justify-center w-full px-3 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 font-medium text-sm gap-2"
+                            class="inline-flex items-center justify-center px-3 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 font-medium text-sm gap-2"
                         >
                             <Users :size="16" />
                             Aanwezigheid
                         </Link>
+                        <div class="grid grid-cols-2 gap-2">
+                            <Link
+                                v-if="!isPast(ev)"
+                                :href="route('practices.edit', ev.id)"
+                                class="inline-flex items-center justify-center px-3 py-2 bg-amber-100 text-amber-700 rounded-md hover:bg-amber-200 font-medium text-sm gap-1"
+                            >
+                                <Edit :size="16" />
+                                Bewerken
+                            </Link>
+                            <button
+                                @click="confirmDelete(ev)"
+                                :class="[
+                                    'inline-flex items-center justify-center px-3 py-2 rounded-md font-medium text-sm gap-1',
+                                    !isPast(ev) ? 'col-span-1' : 'col-span-2',
+                                    'bg-red-100 text-red-700 hover:bg-red-200'
+                                ]"
+                            >
+                                <Trash2 :size="16" />
+                                Verwijderen
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div v-if="events.length === 0" class="px-4 py-6 text-center text-gray-500">
@@ -125,7 +179,7 @@ function isActive(val) {
                         <th class="px-4 py-2 font-medium text-gray-600">Einde</th>
                         <th class="px-4 py-2 font-medium text-gray-600">Locatie</th>
                         <th class="px-4 py-2 font-medium text-gray-600">Notities</th>
-                        <th class="px-4 py-2 font-medium text-gray-600">Acties</th>
+                        <th class="px-4 py-2 font-medium text-gray-600 text-center">Acties</th>
                     </tr>
                     </thead>
 
@@ -139,13 +193,30 @@ function isActive(val) {
                             <span class="text-gray-600">{{ ev.notes || "-" }}</span>
                         </td>
                         <td class="px-4 py-2">
-                            <Link
-                                :href="route('attendance.edit', ev.id)"
-                                class="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 font-medium gap-1"
-                            >
-                                <Users :size="16" />
-                                Aanwezigheid
-                            </Link>
+                            <div class="flex justify-center gap-2">
+                                <Link
+                                    :href="route('attendance.edit', ev.id)"
+                                    class="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 font-medium gap-1"
+                                >
+                                    <Users :size="16" />
+                                    Aanwezigheid
+                                </Link>
+                                <Link
+                                    v-if="!isPast(ev)"
+                                    :href="route('practices.edit', ev.id)"
+                                    class="inline-flex items-center px-3 py-1.5 bg-amber-100 text-amber-700 rounded-md hover:bg-amber-200 font-medium gap-1"
+                                >
+                                    <Edit :size="16" />
+                                    Bewerken
+                                </Link>
+                                <button
+                                    @click="confirmDelete(ev)"
+                                    class="inline-flex items-center px-3 py-1.5 bg-red-100 text-red-700 rounded-md hover:bg-red-200 font-medium gap-1"
+                                >
+                                    <Trash2 :size="16" />
+                                    Verwijderen
+                                </button>
+                            </div>
                         </td>
                     </tr>
 
@@ -157,7 +228,22 @@ function isActive(val) {
                     </tbody>
                 </table>
             </div>
-            </div>
         </div>
-    </AuthenticatedLayout>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <ConfirmModal
+        :show="showDeleteModal"
+        type="danger"
+        title="Training verwijderen"
+        confirm-text="Verwijderen"
+        cancel-text="Annuleren"
+        @confirm="destroyEvent"
+        @cancel="cancelDelete"
+    >
+        <template #message>
+            Weet je zeker dat je de training op <strong>{{ eventToDelete ? fmtDate(eventToDelete.starts_at) : '' }}</strong> wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+        </template>
+    </ConfirmModal>
+</AuthenticatedLayout>
 </template>

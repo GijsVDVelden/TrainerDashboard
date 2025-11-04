@@ -32,9 +32,27 @@ class PracticeController extends Controller
             ->where('team_id', $teamId);
 
         if ($filter === 'upcoming') {
-            $query->where('starts_at', '>=', $now->startOfDay());
+            // Gebruik ends_at als die er is, anders starts_at
+            $query->where(function($q) use ($now) {
+                $q->where(function($subQ) use ($now) {
+                    $subQ->whereNotNull('ends_at')
+                         ->where('ends_at', '>=', $now);
+                })->orWhere(function($subQ) use ($now) {
+                    $subQ->whereNull('ends_at')
+                         ->where('starts_at', '>=', $now);
+                });
+            });
         } elseif ($filter === 'past') {
-            $query->where('starts_at', '<', $now->startOfDay());
+            // Gebruik ends_at als die er is, anders starts_at
+            $query->where(function($q) use ($now) {
+                $q->where(function($subQ) use ($now) {
+                    $subQ->whereNotNull('ends_at')
+                         ->where('ends_at', '<', $now);
+                })->orWhere(function($subQ) use ($now) {
+                    $subQ->whereNull('ends_at')
+                         ->where('starts_at', '<', $now);
+                });
+            });
         }
 
         $events = $query
@@ -95,6 +113,42 @@ class PracticeController extends Controller
         }
 
         return redirect()->route('practices.index')->with('success', 'Training aangemaakt.');
+    }
+
+    public function edit(Event $event)
+    {
+        // Blokkeer bewerken van verlopen evenementen (kijk naar eindtijd)
+        $checkTime = $event->ends_at ?? $event->starts_at;
+        if ($checkTime < now()) {
+            return redirect()
+                ->route('practices.index')
+                ->with('error', 'Verlopen trainingen kunnen niet meer bewerkt worden.');
+        }
+        
+        return Inertia::render('Practices/Form', [
+            'event' => $event,
+            'defaults' => [
+                'team_id'   => $event->team_id,
+                'starts_at' => $event->starts_at,
+                'ends_at'   => $event->ends_at,
+                'location'  => $event->location,
+                'notes'     => $event->notes,
+            ],
+        ]);
+    }
+
+    public function update(PracticeRequest $request, Event $event)
+    {
+        $data = $request->validated();
+
+        $event->update([
+            'starts_at' => $data['starts_at'],
+            'ends_at'   => $data['ends_at'] ?? null,
+            'location'  => $data['location'] ?? null,
+            'notes'     => $data['notes'] ?? null,
+        ]);
+
+        return redirect()->route('practices.index')->with('success', 'Training bijgewerkt.');
     }
 
 }

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EventController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\PracticeController;
@@ -42,17 +43,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/spelers/{player}/stats', [PlayerController::class, 'show'])->name('players.show');
     Route::delete('/spelers/{player}', [PlayerController::class, 'destroy'])->name('players.destroy');
 
-    // Practices
+    // Trainingen
     Route::get('/trainingen', [PracticeController::class, 'index'])->name('practices.index');
     Route::get('/trainingen/nieuw', [PracticeController::class, 'create'])->name('practices.create');
     Route::post('/trainingen', [PracticeController::class, 'store'])->name('practices.store');
+    Route::get('/trainingen/{event}/bewerken', [PracticeController::class, 'edit'])->name('practices.edit');
+    Route::put('/trainingen/{event}', [PracticeController::class, 'update'])->name('practices.update');
 
     // Matches
     Route::get('/wedstrijden', [GameController::class, 'index'])->name('games.index');
     Route::get('/wedstrijden/nieuw', [GameController::class, 'create'])->name('games.create');
     Route::post('/wedstrijden', [GameController::class, 'store'])->name('games.store');
+    Route::get('/wedstrijden/{event}/bewerken', [GameController::class, 'edit'])->name('games.edit');
+    Route::put('/wedstrijden/{event}', [GameController::class, 'update'])->name('games.update');
     Route::get('/wedstrijden/{event}/evalueren', [GameController::class, 'evaluate'])->name('games.evaluate');
     Route::put('/wedstrijden/{event}/evalueren', [GameController::class, 'storeEvaluation'])->name('games.storeEvaluation');
+
+    // Events (algemeen - voor verwijderen)
+    Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
 
     // Attendance
     Route::prefix('events/{event}')->group(function () {

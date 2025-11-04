@@ -6,6 +6,10 @@ import { watch } from "vue";
 import { Save, X } from "lucide-vue-next";
 
 const props = defineProps({
+    event: {
+        type: Object,
+        default: null,
+    },
     defaults: {
         type: Object,
         default: () => ({
@@ -63,16 +67,20 @@ function submit() {
         notes: form.notes,
     };
     
-    form.transform(() => submitData).post(route("games.store"));
+    if (props.event) {
+        form.transform(() => submitData).put(route("games.update", props.event.id));
+    } else {
+        form.transform(() => submitData).post(route("games.store"));
+    }
 }
 </script>
 
 <template>
-    <Head title="Nieuwe wedstrijd" />
+    <Head :title="event ? 'Wedstrijd bewerken' : 'Nieuwe wedstrijd'" />
     <AuthenticatedLayout>
         <div class="space-y-6">
             <PageHeader 
-                title="Nieuwe wedstrijd"
+                :title="event ? 'Wedstrijd bewerken' : 'Nieuwe wedstrijd'"
                 :back-route="route('games.index')"
             />
             

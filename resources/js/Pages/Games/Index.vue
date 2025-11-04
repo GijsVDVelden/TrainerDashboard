@@ -1,13 +1,40 @@
     <script setup>
     import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
     import PageHeader from "@/Components/PageHeader.vue";
-    import { Head, Link } from "@inertiajs/vue3";
-    import { Plus, Users, ClipboardCheck } from "lucide-vue-next";
+    import ConfirmModal from "@/Components/ConfirmModal.vue";
+    import { Head, Link, useForm } from "@inertiajs/vue3";
+    import { Plus, Users, ClipboardCheck, Edit, Trash2 } from "lucide-vue-next";
+    import { ref } from "vue";
 
     const props = defineProps({
         events: Array,   // wedstrijden met game-relatie
         filter: String,  // 'upcoming' | 'past'
     });
+
+    const deleteForm = useForm({});
+    const showDeleteModal = ref(false);
+    const eventToDelete = ref(null);
+
+    function confirmDelete(event) {
+        eventToDelete.value = event;
+        showDeleteModal.value = true;
+    }
+
+    function destroyEvent() {
+        if (eventToDelete.value) {
+            deleteForm.delete(route("events.destroy", eventToDelete.value.id), {
+                onSuccess: () => {
+                    showDeleteModal.value = false;
+                    eventToDelete.value = null;
+                }
+            });
+        }
+    }
+
+    function cancelDelete() {
+        showDeleteModal.value = false;
+        eventToDelete.value = null;
+    }
 
     // Datum formatter
     function fmtDate(dt) {
@@ -26,6 +53,12 @@
     // Helper voor actieve tab
     function isActive(val) {
         return (props.filter ?? "upcoming") === val;
+    }
+
+    // Check of evenement verlopen is (gebruik ends_at of starts_at als er geen eindtijd is)
+    function isPast(event) {
+        const checkTime = event.ends_at || event.starts_at;
+        return new Date(checkTime) < new Date();
     }
     </script>
 
@@ -120,6 +153,27 @@
                                     <ClipboardCheck :size="16" />
                                     Evalueer
                                 </Link>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <Link
+                                        v-if="!isPast(ev)"
+                                        :href="route('games.edit', ev.id)"
+                                        class="inline-flex items-center justify-center px-3 py-2 bg-amber-100 text-amber-700 rounded-md hover:bg-amber-200 font-medium text-sm gap-1"
+                                    >
+                                        <Edit :size="16" />
+                                        Bewerken
+                                    </Link>
+                                    <button
+                                        @click="confirmDelete(ev)"
+                                        :class="[
+                                            'inline-flex items-center justify-center px-3 py-2 rounded-md font-medium text-sm gap-1',
+                                            !isPast(ev) ? 'col-span-1' : 'col-span-2',
+                                            'bg-red-100 text-red-700 hover:bg-red-200'
+                                        ]"
+                                    >
+                                        <Trash2 :size="16" />
+                                        Verwijderen
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <div v-if="events.length === 0" class="px-4 py-6 text-center text-gray-500">
@@ -168,6 +222,21 @@
                                         <ClipboardCheck :size="16" />
                                         Evalueer
                                     </Link>
+                                    <Link
+                                        v-if="!isPast(ev)"
+                                        :href="route('games.edit', ev.id)"
+                                        class="inline-flex items-center px-3 py-1.5 bg-amber-100 text-amber-700 rounded-md hover:bg-amber-200 font-medium gap-1"
+                                    >
+                                        <Edit :size="16" />
+                                        Bewerken
+                                    </Link>
+                                    <button
+                                        @click="confirmDelete(ev)"
+                                        class="inline-flex items-center px-3 py-1.5 bg-red-100 text-red-700 rounded-md hover:bg-red-200 font-medium gap-1"
+                                    >
+                                        <Trash2 :size="16" />
+                                        Verwijderen
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -182,5 +251,20 @@
                 </div>
                 </div>
             </div>
+
+            <!-- Delete Confirmation Modal -->
+            <ConfirmModal
+                :show="showDeleteModal"
+                type="danger"
+                title="Wedstrijd verwijderen"
+                confirm-text="Verwijderen"
+                cancel-text="Annuleren"
+                @confirm="destroyEvent"
+                @cancel="cancelDelete"
+            >
+                <template #message>
+                    Weet je zeker dat je de wedstrijd tegen <strong>{{ eventToDelete?.game?.opponent }}</strong> wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+                </template>
+            </ConfirmModal>
         </AuthenticatedLayout>
     </template>
