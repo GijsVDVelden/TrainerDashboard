@@ -59,41 +59,50 @@ function cancelDelete() {
                     <div
                         v-for="player in players"
                         :key="player.id"
-                        class="border border-gray-200 rounded-lg p-4 bg-white hover:shadow-sm transition"
+                        class="border border-gray-200 rounded-lg p-4 bg-white hover:shadow-md transition"
                     >
-                        <h2 class="text-lg font-semibold">
-                            {{ player.first_name }} {{ player.last_name }}
-                        </h2>
-
-                        <!-- Positie -->
-                        <p class="text-sm text-gray-600 mt-1">
-                            {{ Array.isArray(player.positions)
-                            ? player.positions.map(p => p.name).join(", ")
-                            : (typeof player.position === "string"
-                                ? player.position
-                                : player.position?.value ?? player.position) }}
-                        </p>
-
-                        <!-- Geboortedatum -->
-                        <p class="text-sm text-gray-500 mt-1">
-                            Geboortedatum: {{ new Date(player.birth_date).toLocaleDateString("nl-NL") }}
-                        </p>
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h2 class="text-lg font-semibold text-gray-900">
+                                    {{ player.first_name }} {{ player.last_name }}
+                                </h2>
+                                <!-- Positie -->
+                                <p class="text-sm text-gray-600 mt-1">
+                                    {{ Array.isArray(player.positions)
+                                    ? player.positions.map(p => p.name).join(", ")
+                                    : (typeof player.position === "string"
+                                        ? player.position
+                                        : player.position?.value ?? player.position) }}
+                                </p>
+                                <!-- Geboortedatum -->
+                                <p class="text-xs text-gray-500 mt-1">
+                                    {{ new Date(player.birth_date).toLocaleDateString("nl-NL") }}
+                                </p>
+                            </div>
+                        </div>
 
                         <!-- Acties -->
-                        <div class="mt-3 flex gap-2">
+                        <div class="grid grid-cols-3 gap-2 mt-4">
+                            <Link
+                                :href="route('players.show', player.id)"
+                                class="px-3 py-2.5 text-center rounded-md bg-green-100 text-green-700 hover:bg-green-200 font-medium text-sm inline-flex items-center justify-center gap-1.5"
+                            >
+                                <BarChart3 :size="18" />
+                                <span class="hidden sm:inline">Stats</span>
+                            </Link>
                             <Link
                                 :href="route('players.edit', player.id)"
-                                class="flex-1 px-3 py-1.5 text-center rounded-md bg-amber-100 text-amber-700 hover:bg-amber-200 font-medium text-sm inline-flex items-center justify-center gap-1"
+                                class="px-3 py-2.5 text-center rounded-md bg-amber-100 text-amber-700 hover:bg-amber-200 font-medium text-sm inline-flex items-center justify-center gap-1.5"
                             >
-                                <Edit :size="16" />
-                                Bewerken
+                                <Edit :size="18" />
+                                <span class="hidden sm:inline">Bewerk</span>
                             </Link>
                             <button
-                                class="flex-1 px-3 py-1.5 rounded-md bg-red-100 text-red-700 hover:bg-red-200 font-medium text-sm inline-flex items-center justify-center gap-1"
+                                class="px-3 py-2.5 rounded-md bg-red-100 text-red-700 hover:bg-red-200 font-medium text-sm inline-flex items-center justify-center gap-1.5"
                                 @click="confirmDelete(player)"
                             >
-                                <Trash2 :size="16" />
-                                Verwijderen
+                                <Trash2 :size="18" />
+                                <span class="hidden sm:inline">Verwijder</span>
                             </button>
                         </div>
                     </div>
