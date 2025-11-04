@@ -98,7 +98,7 @@ class PlayerController extends Controller
 
         $player->load([
             'team',
-            'attendances.event',
+            'attendances.event.game',
         ]);
 
         return Inertia::render('Players/Show', [
