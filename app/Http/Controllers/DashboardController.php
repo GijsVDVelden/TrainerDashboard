@@ -21,7 +21,27 @@ class DashboardController extends Controller
             ->where('type', EventType::Training->value)
             ->count();
 
-        // Upcoming events (next 30 days)
+        // All events for calendar (last 30 days and next 60 days to cover current month view)
+        $calendarEvents = Event::where('team_id', $teamId)
+            ->where('starts_at', '>=', now()->subDays(30))
+            ->where('starts_at', '<=', now()->addDays(60))
+            ->orderBy('starts_at')
+            ->get()
+            ->map(function ($event) {
+                return [
+                    'id' => $event->id,
+                    'type' => $event->type,
+                    'starts_at' => $event->starts_at,
+                    'ends_at' => $event->ends_at,
+                    'location' => $event->location,
+                    'game' => $event->game ? [
+                        'opponent' => $event->game->opponent,
+                        'home' => $event->game->home,
+                    ] : null,
+                ];
+            });
+
+        // Upcoming events for sidebar (only future events, next 30 days)
         $upcomingEvents = Event::where('team_id', $teamId)
             ->where('starts_at', '>=', now())
             ->where('starts_at', '<=', now()->addDays(30))
@@ -98,6 +118,7 @@ class DashboardController extends Controller
         return Inertia::render('Dashboard', [
             'attendanceStats' => $attendanceStats,
             'totalTrainings' => $totalTrainings,
+            'calendarEvents' => $calendarEvents,
             'upcomingEvents' => $upcomingEvents,
             'recentEvents' => $recentEvents,
             'totalPlayers' => $totalPlayers,
