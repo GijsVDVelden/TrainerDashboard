@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Attendance;
 use App\Models\Event;
+use App\Enums\EventType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -17,12 +18,64 @@ class DashboardController extends Controller
 
         // Totaal aantal trainingen
         $totalTrainings = Event::where('team_id', $teamId)
-            ->where('type', 'Training')
+            ->where('type', EventType::Training->value)
+            ->count();
+
+        // Upcoming events (next 30 days)
+        $upcomingEvents = Event::where('team_id', $teamId)
+            ->where('starts_at', '>=', now())
+            ->where('starts_at', '<=', now()->addDays(30))
+            ->orderBy('starts_at')
+            ->get()
+            ->map(function ($event) {
+                return [
+                    'id' => $event->id,
+                    'type' => $event->type,
+                    'starts_at' => $event->starts_at,
+                    'ends_at' => $event->ends_at,
+                    'location' => $event->location,
+                    'game' => $event->game ? [
+                        'opponent' => $event->game->opponent,
+                        'home' => $event->game->home,
+                    ] : null,
+                ];
+            });
+
+        // Recent events (last 5)
+        $recentEvents = Event::where('team_id', $teamId)
+            ->where('starts_at', '<', now())
+            ->orderBy('starts_at', 'desc')
+            ->take(5)
+            ->get()
+            ->map(function ($event) {
+                return [
+                    'id' => $event->id,
+                    'type' => $event->type,
+                    'starts_at' => $event->starts_at,
+                    'location' => $event->location,
+                    'game' => $event->game ? [
+                        'opponent' => $event->game->opponent,
+                        'home' => $event->game->home,
+                    ] : null,
+                ];
+            });
+
+        // Player stats
+        $totalPlayers = \App\Models\Player::where('team_id', $teamId)->count();
+
+        // Game stats
+        $totalGames = Event::where('team_id', $teamId)
+            ->where('type', EventType::Match->value)
+            ->count();
+
+        $upcomingGames = Event::where('team_id', $teamId)
+            ->where('type', EventType::Match->value)
+            ->where('starts_at', '>=', now())
             ->count();
 
         // Opkomst per speler
         $attendanceStats = Attendance::with('player')
-            ->whereHas('event', fn($q) => $q->where('team_id', $teamId)->where('type', 'Training'))
+            ->whereHas('event', fn($q) => $q->where('team_id', $teamId)->where('type', EventType::Training->value))
             ->get()
             ->groupBy('player_id')
             ->map(function ($attendances) use ($totalTrainings) {
@@ -45,6 +98,11 @@ class DashboardController extends Controller
         return Inertia::render('Dashboard', [
             'attendanceStats' => $attendanceStats,
             'totalTrainings' => $totalTrainings,
+            'upcomingEvents' => $upcomingEvents,
+            'recentEvents' => $recentEvents,
+            'totalPlayers' => $totalPlayers,
+            'totalGames' => $totalGames,
+            'upcomingGames' => $upcomingGames,
         ]);
     }
 
