@@ -21,4 +21,23 @@ class Player extends Model
     {
         return $this->belongsTo(Team::class);
     }
+
+    public function attendances() {
+        return $this->hasMany(Attendance::class);
+    }
+
+    public function gameStats() {
+        return $this->hasMany(GamePlayerStats::class);
+    }
+
+    public function aggregatedStats()
+    {
+        return [
+            'goals'        => $this->gameStats()->sum('goals'),
+            'assists'      => $this->gameStats()->sum('assists'),
+            'yellow_cards' => $this->gameStats()->sum('yellow_cards'),
+            'red_cards'    => $this->gameStats()->sum('red_cards'),
+        ];
+    }
+
 }

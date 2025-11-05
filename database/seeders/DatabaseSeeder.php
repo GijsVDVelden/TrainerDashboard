@@ -29,9 +29,9 @@ class DatabaseSeeder extends Seeder
 
         // 2. Maak een seizoen aan
         $season = Season::create([
-            'name' => '2024/2025',
-            'start_date' => '2024-08-01',
-            'end_date' => '2025-06-30',
+            'name' => '2025/2026',
+            'start_date' => '2025-08-01',
+            'end_date' => '2026-06-30',
         ]);
 
         // 3. Maak teams aan
@@ -127,12 +127,6 @@ class DatabaseSeeder extends Seeder
                 'birth_date' => '2009-08-21',
             ],
             [
-                'first_name' => 'Sebbe',
-                'last_name' => 'van Rijn',
-                'position' => PlayerPositions::GK->value,
-                'birth_date' => '2009-08-21',
-            ],
-            [
                 'first_name' => 'Jordan',
                 'last_name' => 'Schreuders',
                 'position' => PlayerPositions::CVM->value,
@@ -157,9 +151,9 @@ class DatabaseSeeder extends Seeder
                 'birth_date' => '2009-08-21',
             ],
             [
-                'first_name' => 'Sverre',
-                'last_name' => 'Wiersma',
-                'position' => PlayerPositions::GK->value,
+                'first_name' => 'Esrom',
+                'last_name' => 'Gebrezgahiber',
+                'position' => PlayerPositions::LW->value,
                 'birth_date' => '2009-08-21',
             ],
         ]);

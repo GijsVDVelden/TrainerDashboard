@@ -1,6 +1,11 @@
 <?php
 
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\GameController;
 use App\Http\Controllers\PlayerController;
+use App\Http\Controllers\PracticeController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -19,33 +24,50 @@ Route::get('/', fn () => redirect()->route('dashboard'));
 Route::middleware(['auth', 'verified'])->group(function () {
 
     // Dashboard
-    Route::get('/dashboard', fn () => Inertia::render('Dashboard'))
+    Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
 
-    Route::post('/active-team', function (Request $request) {
-        $validated = $request->validate([
-            'team_id' => ['required', 'exists:teams,id'],
-        ]);
+    Route::get('/instellingen', [DashboardController::class, 'settings'])->name('settings');
+    Route::post('/instellingen', [DashboardController::class, 'updateSettings'])->name('settings.update');
 
-        $allowed = $request->user()
-            ->teams()
-            ->whereKey($validated['team_id'])
-            ->exists();
-
-        abort_unless($allowed, 403, 'Je mag dit team niet selecteren.');
-
-        session(['active_team_id' => $validated['team_id']]);
-
-        return back();
-    })->name('active-team.set');
+    // Active team
+    Route::post('/active-team', [DashboardController::class, 'setActiveTeam'])
+        ->name('active-team.set');
 
     // Players
-    Route::get('/players', [PlayerController::class, 'index'])->name('players.index');
-    Route::get('/players/create', [PlayerController::class, 'create'])->name('players.create');
-    Route::post('/players', [PlayerController::class, 'store'])->name('players.store');
-    Route::get('/players/{player}/edit', [PlayerController::class, 'edit'])->name('players.edit');
-    Route::put('/players/{player}', [PlayerController::class, 'update'])->name('players.update');
-    Route::delete('/players/{player}', [PlayerController::class, 'destroy'])->name('players.destroy');
+    Route::get('/spelers', [PlayerController::class, 'index'])->name('players.index');
+    Route::get('/spelers/nieuw', [PlayerController::class, 'create'])->name('players.create');
+    Route::post('/spelers', [PlayerController::class, 'store'])->name('players.store');
+    Route::get('/spelers/{player}/bewerken', [PlayerController::class, 'edit'])->name('players.edit');
+    Route::put('/spelers/{player}', [PlayerController::class, 'update'])->name('players.update');
+    Route::get('/spelers/{player}/stats', [PlayerController::class, 'show'])->name('players.show');
+    Route::delete('/spelers/{player}', [PlayerController::class, 'destroy'])->name('players.destroy');
+
+    // Trainingen
+    Route::get('/trainingen', [PracticeController::class, 'index'])->name('practices.index');
+    Route::get('/trainingen/nieuw', [PracticeController::class, 'create'])->name('practices.create');
+    Route::post('/trainingen', [PracticeController::class, 'store'])->name('practices.store');
+    Route::get('/trainingen/{event}/bewerken', [PracticeController::class, 'edit'])->name('practices.edit');
+    Route::put('/trainingen/{event}', [PracticeController::class, 'update'])->name('practices.update');
+
+    // Matches
+    Route::get('/wedstrijden', [GameController::class, 'index'])->name('games.index');
+    Route::get('/wedstrijden/nieuw', [GameController::class, 'create'])->name('games.create');
+    Route::post('/wedstrijden', [GameController::class, 'store'])->name('games.store');
+    Route::get('/wedstrijden/{event}/bewerken', [GameController::class, 'edit'])->name('games.edit');
+    Route::put('/wedstrijden/{event}', [GameController::class, 'update'])->name('games.update');
+    Route::get('/wedstrijden/{event}/evalueren', [GameController::class, 'evaluate'])->name('games.evaluate');
+    Route::put('/wedstrijden/{event}/evalueren', [GameController::class, 'storeEvaluation'])->name('games.storeEvaluation');
+
+    // Events (algemeen - voor verwijderen)
+    Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
+
+    // Attendance
+    Route::prefix('events/{event}')->group(function () {
+        Route::get('/aanwezigheid', [AttendanceController::class, 'edit'])->name('attendance.edit');
+        Route::post('/aanwezigheid', [AttendanceController::class, 'store'])->name('attendance.store');
+        Route::put('/aanwezigheid', [AttendanceController::class, 'update'])->name('attendance.update');
+    });
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
