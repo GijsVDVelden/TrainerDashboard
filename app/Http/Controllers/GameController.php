@@ -112,18 +112,6 @@ class GameController extends Controller
             'home'     => $data['home'],
         ]);
 
-        $players = $event->team->players;
-
-        foreach ($players as $player) {
-            $event->attendances()->create([
-                'player_id' => $player->id,
-                'status'    => AttendanceStatus::PRESENT,
-                'reason'    => null,
-                'late'      => false,
-                'notes'     => null,
-            ]);
-        }
-
         return redirect()
             ->route('games.index')
             ->with('success', 'Wedstrijd succesvol aangemaakt!');

@@ -28,9 +28,18 @@ const props = defineProps({
 function splitDateTime(datetime) {
     if (!datetime) return { date: "", time: "" };
     const d = new Date(datetime);
-    const date = d.toISOString().split('T')[0];
-    const time = d.toTimeString().slice(0, 5);
-    return { date, time };
+    
+    // Gebruik lokale tijd in plaats van UTC
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    
+    return { 
+        date: `${year}-${month}-${day}`, 
+        time: `${hours}:${minutes}` 
+    };
 }
 
 const startDateTime = splitDateTime(props.defaults.starts_at);

@@ -3,12 +3,14 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import PageHeader from "@/Components/PageHeader.vue";
 import { Head, useForm } from "@inertiajs/vue3";
 import { Save, X } from "lucide-vue-next";
+import { computed } from "vue";
 
 const props = defineProps({
     event: Object,
     players: Array,
     attendances: Object, // keyed by player_id
-    reasons: Array       // ["Ziekte", "Vakantie", "Blessure", "Anders"]
+    reasons: Array,      // ["Ziekte", "Vakantie", "Blessure", "Anders"]
+    from: String,        // 'dashboard' of null
 });
 
 const form = useForm({
@@ -19,6 +21,15 @@ const form = useForm({
         reason: props.attendances[player.id]?.reason ?? null,
         notes: props.attendances[player.id]?.notes ?? "",
     })),
+});
+
+// Bepaal de back route op basis van waar je vandaan komt
+const backRoute = computed(() => {
+    if (props.from === 'dashboard') {
+        return route('dashboard');
+    }
+    // Anders ga terug naar de event lijst (games of practices)
+    return props.event.type === 'match' ? route('games.index') : route('practices.index');
 });
 
 // Helpers
@@ -58,12 +69,10 @@ function submit() {
     <Head :title="`Aanwezigheid - ${event.type} ${event.starts_at}`" />
     <AuthenticatedLayout>
         <div class="space-y-6">
-            <PageHeader 
-                :title="`Aanwezigheid voor ${event.type} - ${new Date(event.starts_at).toLocaleDateString('nl-NL')}`"
-                :back-route="event.type === 'Wedstrijd' ? route('games.index') : route('practices.index')"
-            />
-            
-            <div class="p-4 sm:p-6 bg-white rounded-lg shadow-sm">
+        <PageHeader
+            :title="'Aanwezigheid: ' + event.title"
+            :back-route="backRoute"
+        ></PageHeader>            <div class="p-4 sm:p-6 bg-white rounded-lg shadow-sm">
                 <form @submit.prevent="submit" class="space-y-4">
                     
                     <!-- Mobile Cards (hidden on lg+) -->

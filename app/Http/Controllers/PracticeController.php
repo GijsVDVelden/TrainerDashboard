@@ -99,19 +99,6 @@ class PracticeController extends Controller
             'notes'     => $data['notes'] ?? null,
         ]);
 
-
-        $players = $event->team->players;
-
-        foreach ($players as $player) {
-            $event->attendances()->create([
-                'player_id' => $player->id,
-                'status'    => AttendanceStatus::PRESENT,
-                'reason'    => null,
-                'late'      => false,
-                'notes'     => null,
-            ]);
-        }
-
         return redirect()->route('practices.index')->with('success', 'Training aangemaakt.');
     }
 

@@ -2,7 +2,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import { Link } from '@inertiajs/vue3';
-import { Calendar, Users, Trophy, CalendarDays, TrendingUp, MapPin } from 'lucide-vue-next';
+import { Calendar, Users, Trophy, CalendarDays, TrendingUp, MapPin, ClipboardList } from 'lucide-vue-next';
 import { ref, computed } from 'vue';
 
 const props = defineProps({
@@ -397,20 +397,29 @@ const dayNames = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
                                     : 'bg-green-50 border-green-200'
                             ]"
                         >
-                            <div class="flex items-start gap-2">
-                                <Calendar :size="16" :class="event.type === 'match' ? 'text-amber-700' : 'text-green-700'" class="mt-0.5" />
-                                <div class="flex-1 min-w-0">
-                                    <p class="font-medium text-sm text-gray-900 truncate">
-                                        {{ event.type === 'match' ? event.game.opponent : 'Training' }}
-                                    </p>
-                                    <p class="text-xs text-gray-600 mt-0.5">
-                                        {{ formatDate(event.starts_at) }} • {{ formatTime(event.starts_at) }}
-                                    </p>
-                                    <p class="text-xs text-gray-500 flex items-center gap-1 mt-1">
-                                        <MapPin :size="12" />
-                                        {{ event.location }}
-                                    </p>
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="flex items-start gap-2 flex-1 min-w-0">
+                                    <Calendar :size="16" :class="event.type === 'match' ? 'text-amber-700' : 'text-green-700'" class="mt-0.5 flex-shrink-0" />
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-medium text-sm text-gray-900 truncate">
+                                            {{ event.type === 'match' ? event.game.opponent : 'Training' }}
+                                        </p>
+                                        <p class="text-xs text-gray-600 mt-0.5">
+                                            {{ formatDate(event.starts_at) }} • {{ formatTime(event.starts_at) }}
+                                        </p>
+                                        <p v-if="event.location" class="text-xs text-gray-500 flex items-center gap-1 mt-1">
+                                            <MapPin :size="12" />
+                                            {{ event.location }}
+                                        </p>
+                                    </div>
                                 </div>
+                                <Link
+                                    :href="route('attendance.edit', { event: event.id, from: 'dashboard' })"
+                                    class="flex-shrink-0 px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-xs font-medium inline-flex items-center gap-1"
+                                    :title="'Aanwezigheid invullen'"
+                                >
+                                    <ClipboardList :size="14" />
+                                </Link>
                             </div>
                         </div>
                     </div>
